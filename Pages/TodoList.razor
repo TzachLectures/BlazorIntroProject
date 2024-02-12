@@ -1,0 +1,50 @@
+﻿@page "/todolist"
+@using BlazorProject.Models;
+@using BlazorProject.Models.Interfaces;
+@inject ITodoService TodoService;
+
+
+<h3>TodoList</h3>
+<input type="text" placeholder="Add new todo" @bind="newTodoTitle"/>
+<button @onclick="AddTodo">Add</button>
+<ul>
+    @foreach(TodoItem todo in todos)
+    {
+        <li style="@GetTodoStyle(todo)">
+            <input type="checkbox" @bind="@todo.IsDone"/>
+            @todo.Title
+            <button @onclick="()=>DeleteTodo(todo.Id)">Delete</button>
+        </li>
+    }
+</ul>
+
+
+@code {
+    private string newTodoTitle;
+    private List<TodoItem> todos = new List<TodoItem>();
+
+    protected override void OnInitialized()
+    {
+        todos = TodoService.GetTodos(); 
+    }
+    private void AddTodo()
+    {
+        if (!string.IsNullOrEmpty(newTodoTitle))
+        {
+            TodoService.AddTodo(new TodoItem { Title = newTodoTitle.Trim() });
+            newTodoTitle = "";
+            todos = TodoService.GetTodos();
+        }
+    }
+
+    private void DeleteTodo(Guid id)
+    {
+        TodoService.DeleteTodo(id);
+        todos = TodoService.GetTodos();
+    }
+
+    private string GetTodoStyle(TodoItem todo)
+    {
+        return todo.IsDone ? "text-decoration:line-through" : "";
+    }
+}

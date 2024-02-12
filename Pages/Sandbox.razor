@@ -1,0 +1,38 @@
+﻿@page "/sandbox"
+@inject IJSRuntime JSRuntime
+
+
+
+<input @bind=currentCount type="number"/>
+
+<p role="status">Current count: @currentCount</p>
+
+<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+
+
+@code {
+    private int currentCount = 0;
+
+    private void IncrementCount()
+    {
+        currentCount++;
+        JSRuntime.InvokeVoidAsync("doSomething", "The counter is "+currentCount);
+
+    }
+    protected override async Task OnInitializedAsync()
+    {
+        Console.WriteLine("hello from initialezed");
+    }
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+        {
+            Console.WriteLine("This is first render");
+        }
+        else
+        {
+             Console.WriteLine("Render again");
+
+        }
+    }
+}
