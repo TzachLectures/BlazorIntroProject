@@ -1,0 +1,47 @@
+﻿@page "/chat"
+@using BlazorProject.Services;
+@inject ChatService ChatService;
+<h3>Chat</h3>
+@if (messages != null)
+{
+    foreach(string msg in messages)
+    {
+        <p>@msg</p>
+    }
+}
+
+<input type="text" @bind="newMessage"/>
+<button @onclick="SendMessage">Send</button>
+
+@code {
+    private List<string> messages = new List<string>();
+    private string newMessage;
+
+    protected override void OnInitialized()
+    {
+        ChatService.OnMessageReceived += UpdateMessages;
+        UpdateMessages();
+    }
+
+    private void SendMessage()
+    {
+        ChatService.SendMessage(newMessage);
+        newMessage = "";
+    }
+
+    private void UpdateMessages()
+    {
+        InvokeAsync(() =>
+        {
+            messages = ChatService.GetMessages();
+            StateHasChanged();
+        });
+
+    }
+
+    public void Dispose()
+    {
+        ChatService.OnMessageReceived -= UpdateMessages;
+    }
+
+}

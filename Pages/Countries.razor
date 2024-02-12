@@ -1,0 +1,76 @@
+﻿@page "/countries"
+@using BlazorProject.Models.Interfaces;
+@using BlazorProject.Models;
+@inject ICountryService CountryService;
+
+<h3>Countries</h3>
+@if(countries==null){
+    <p>Loading...</p>
+}
+else{
+    <input type="number" @bind="minPopulation" placeholder="Min Population" />
+    <input type="number" @bind="maxPopulation" placeholder="Max Population" />
+    <button @onclick="FilterByPopulation">Filter</button>
+
+    <input type="text" @bind="searchTerm" @oninput="SearchCountriesByName" placeholder="Search by name" />
+
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Capital</th>
+                <th>Population</th>
+                <th>Currencies</th>
+                <th>Flag</th>
+                <th>Maps</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var country in filteredCountries)
+            {
+                <tr>
+                    <td>@country.Name.Common</td>
+                    <td>@(country.Capital?.FirstOrDefault() ?? "N/A")</td>
+                    <td>@country.Population</td>
+                    <td>
+                        @if (country.Currencies != null)
+                        {
+                            @foreach (var currencyEntry in country.Currencies)
+                            {
+                                <span>@currencyEntry.Value.Name (@currencyEntry.Value.Symbol)</span>
+                            }
+                        }
+                    </td>
+                    <td><img src="@country.Flags.Png" alt="Flag" style="width: 50px; height: auto;"></td>
+                    <td><a href="@country.Maps.GoogleMaps" target="_blank">Google Maps</a></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+
+@code {
+    private List<Country> countries;
+    private List<Country> filteredCountries;
+    private int minPopulation;
+    private int maxPopulation;
+    private string searchTerm;
+
+    protected override async Task OnInitializedAsync()
+    {
+        countries = await CountryService.GetAllCountriesAsync();
+        filteredCountries = countries;
+    }
+     private async Task  FilterByPopulation()
+    {
+        filteredCountries = await CountryService.GetCountriesByPopulationAsync(minPopulation, maxPopulation);
+    }
+
+    private async Task SearchCountriesByName(ChangeEventArgs e)
+    {
+        Console.WriteLine(searchTerm);
+        filteredCountries = await CountryService.SearchCountriesByNameAsync(e.Value.ToString());
+
+    }
+}

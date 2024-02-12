@@ -17,6 +17,8 @@ namespace BlazorProject
             builder.Services.AddServerSideBlazor();
             builder.Services.AddSingleton<WeatherForecastService>();
             builder.Services.AddSingleton< ITodoService,TodoService>();
+            builder.Services.AddHttpClient<ICountryService,CountryService>();
+            builder.Services.AddSingleton<ChatService>();
 
             var app = builder.Build();
 
